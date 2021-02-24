@@ -1,20 +1,15 @@
 package com.elysino.comicapp.slashscreen;
 
-import android.app.Activity;
 import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.elysino.comicapp.network.Api;
 import com.elysino.comicapp.ComicData;
-import com.elysino.comicapp.slashscreen.swapcar.SwapCard;
+import com.elysino.comicapp.network.Api;
 import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.util.ArrayList;
-
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -23,22 +18,22 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
 
-class SplashPresenter implements SplashController.View{
-
+class SplashPresenter implements SplashItemsInteractor.OnFinishedListener{
+    SplashItemsInteractor splashItemsInteractor;
     Api api;
-    ArrayList<ComicData> arrayList;
     ContentValues values;
     SQLiteDatabase sqLiteDatabase;
     int lastValue=24;
-    Context context;
+    SplashView splashView;
 
+    ArrayList<ComicData> arrayList=new ArrayList<>();
 
-    SplashPresenter(Api api, ArrayList<ComicData> arrayList, ContentValues values, SQLiteDatabase sqLiteDatabase, SplashScreen context){
+    public SplashPresenter(SplashView splashView, SplashItemsInteractor splashItemsInteractor, Api api, SQLiteDatabase sqLiteDatabase, ContentValues values) {
+        this.splashView = splashView;
+        this.splashItemsInteractor = splashItemsInteractor;
         this.api=api;
-        this.arrayList=arrayList;
-        this.values=values;
         this.sqLiteDatabase=sqLiteDatabase;
-        this.context=context;
+        this.values=values;
     }
 
     @Override
@@ -80,7 +75,7 @@ class SplashPresenter implements SplashController.View{
                                     getComic(++currentComicPosition);
                                 }else {
                                     sqLiteDatabase.close();
-                                    openSwapCardScreen();
+                                    splashView.openSwapCardScreen();
                                 }
                                 break;
                             default:
@@ -98,12 +93,4 @@ class SplashPresenter implements SplashController.View{
                     }
                 });
     }
-
-    @Override
-    public void openSwapCardScreen() {
-        Intent intent=new Intent(context,SwapCard.class);
-        context.startActivity(intent);
-        ((Activity)context).finish();
-    }
-
 }
